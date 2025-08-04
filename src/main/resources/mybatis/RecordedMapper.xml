@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.app.mapper.RecordedMapper">
+
+    <!--
+        [Auto-Mappingを利用]
+        データベースの列名（record_id, recorded_atなど）と
+        Recordedクラスのプロパティ名（recordId, recordAtなど）が
+        自動でマッピングされるため、resultMapを省略します。
+
+        ※この機能を利用するには、MyBatisの設定ファイルで
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        を有効にする必要があります。
+    -->
+
+    <!-- 全ての録音データを取得する -->
+    <select id="findAll" resultType="com.example.app.domain.Recorded">
+        SELECT * FROM records
+    </select>
+
+    <!-- 特定のユーザーIDに紐づく録音データを全て取得する -->
+    <select id="findByUserId" resultType="com.example.app.domain.Recorded" parameterType="Integer">
+        SELECT * FROM records WHERE user_id = #{userId}
+    </select>
+    
+    <!-- 特定の録音IDでデータを取得する -->
+    <select id="findByRecordId" resultType="com.example.app.domain.Recorded" parameterType="Integer">
+        SELECT * FROM records WHERE record_id = #{recordId}
+    </select>
+
+    <!--
+        [Web API用SQL]
+        特定のユーザーIDと緯度・経度の範囲でデータを取得します。
+        
+        注意：これは単純なSQL文であり、より高速な検索には
+        データベースの空間インデックス（Spatial Index）を
+        使用することを推奨します。
+    -->
+<!--    <select id="findByUserIdAndLocation" resultType="com.example.app.domain.Recorded" parameterType="map">-->
+<!--        SELECT *-->
+<!--        FROM records-->
+<!--        WHERE-->
+<!--            user_id = #{userId}-->
+<!--        AND-->
+<!--            latitude BETWEEN #{minLatitude} AND #{maxLatitude}-->
+<!--        AND-->
+<!--            longitude BETWEEN #{minLongitude} AND #{maxLongitude}-->
+<!--    </select>-->
+    
+    
+    
+    <!-- 新しい録音データを登録する -->
+    <insert id="insert" parameterType="com.example.app.domain.Recorded" useGeneratedKeys="true" keyProperty="recordId">
+        INSERT INTO records (title, record, user_id, recorded_at, latitude, longitude, rating)
+        VALUES (#{title}, #{record}, #{userId}, #{recordAt}, #{latitude}, #{longitude}, #{rating})
+    </insert>
+    
+    <!-- 録音データを更新する -->
+    <update id="update" parameterType="com.example.app.domain.Recorded">
+        UPDATE records
+        SET
+            title = #{title},
+            record = #{record},
+            recorded_at = #{recordAt},
+            latitude = #{latitude},
+            longitude = #{longitude},
+            rating = #{rating}
+        WHERE
+            record_id = #{recordId}
+    </update>
+    
+
+    <!-- 特定の録音IDでデータを削除する -->
+    <delete id="deleteById" parameterType="Integer">
+        DELETE FROM records WHERE record_id = #{recordId}
+    </delete>
+
+</mapper>
+

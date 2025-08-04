@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.app.mapper.UserMapper">
+
+    <!--
+        [Auto-Mappingを利用]
+        データベースの列名（user_id, user_nameなど）と
+        Userクラスのプロパティ名（userId, userNameなど）が
+        自動でマッピングされるため、resultMapを省略します。
+
+        ※この機能を利用するには、MyBatisの設定ファイルで
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        を有効にする必要があります。
+    -->
+
+    <!-- 全てのユーザーを取得する -->
+    <select id="findAll" resultType="com.example.app.domain.User">
+        SELECT user_id, user_name, email, password, capacity FROM users
+    </select>
+
+    <!-- 特定のユーザーIDでデータを取得する -->
+    <select id="findById" resultType="com.example.app.domain.User" parameterType="Integer">
+        SELECT user_id, user_name, email, password, capacity FROM users WHERE user_id = #{userId}
+    </select>
+
+    <!-- メールアドレスでユーザーデータを取得する（ログイン認証などに利用） -->
+    <select id="findByEmail" resultType="com.example.app.domain.User" parameterType="String">
+        SELECT user_id, user_name, email, password, capacity FROM users WHERE email = #{email}
+    </select>
+    
+    <!--
+        [Web API用SQL]
+        メールアドレスとパスワードでユーザーを取得する。
+        ログイン処理の認証に利用します。
+        
+        注意：このSQLは平文のパスワードで認証を行いますが、
+        本番環境ではパスワードをハッシュ化してデータベースに保存し、
+        ハッシュ値で比較する実装にしてください。
+    -->
+    <select id="findByEmailAndPassword" resultType="com.example.app.domain.User" parameterType="map">
+        SELECT user_id, user_name, email, password, capacity
+        FROM users
+        WHERE email = #{email} AND password = #{password}
+    </select>
+
+
+    <!-- 新しいユーザーを登録する -->
+    <insert id="insert" parameterType="com.example.app.domain.User" useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO users (user_name, email, password, capacity)
+        VALUES (#{userName}, #{email}, #{password}, #{capacity})
+    </insert>
+
+    <!-- ユーザー情報を更新する -->
+    <update id="update" parameterType="com.example.app.domain.User">
+        UPDATE users
+        SET
+            user_name = #{userName},
+            email = #{email},
+            password = #{password},
+            capacity = #{capacity}
+        WHERE
+            user_id = #{userId}
+    </update>
+
+    <!-- 特定のユーザーIDでユーザーを削除する -->
+    <delete id="deleteById" parameterType="Integer">
+        DELETE FROM users WHERE user_id = #{userId}
+    </delete>
+
+</mapper>
