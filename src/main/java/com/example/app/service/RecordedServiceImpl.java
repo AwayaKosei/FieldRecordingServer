@@ -33,16 +33,16 @@ public class RecordedServiceImpl implements RecordedService {
         return recordedMapper.findByRecordId(recordId);
     }
 
-//    @Override
-//    public List<Recorded> findByUserIdAndLocation(
-//        Integer userId,
-//        double minLatitude,
-//        double maxLatitude,
-//        double minLongitude,
-//        double maxLongitude
-//    ) {
-//        return recordedMapper.findByUserIdAndLocation(userId, minLatitude, maxLatitude, minLongitude, maxLongitude);
-//    }
+    @Override
+    public List<Recorded> findByUserIdAndLocation(
+        Integer userId,
+        double minLatitude,
+        double maxLatitude,
+        double minLongitude,
+        double maxLongitude
+    ) {
+        return recordedMapper.findByUserIdAndLocation(userId, minLatitude, maxLatitude, minLongitude, maxLongitude);
+    }
     
     @Override
     public void register(Recorded recorded) {

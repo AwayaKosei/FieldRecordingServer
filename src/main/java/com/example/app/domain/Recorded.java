@@ -1,6 +1,5 @@
 package com.example.app.domain;
 
-import java.sql.Blob;
 import java.time.LocalDateTime;
 
 import lombok.Data;
@@ -14,7 +13,7 @@ public class Recorded {
 	private String title;
 	
 	//録音データ
-  private Blob record;//TODO 処理が重いようであればストレージに移行、後で判断する
+  private byte[] record;//TODO 処理が重いようであればストレージに移行、後で判断する
 	
 	//録音者
 	private Integer userId;

@@ -2,7 +2,6 @@ package com.example.app.controller;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.app.domain.Recorded;
@@ -86,25 +84,25 @@ public class RecordedController {
      * @param session HTTPセッション
      * @return 検索結果の録音データリスト
      */
-    @GetMapping("/search")
-    public ResponseEntity<?> searchByLocation(@RequestParam Map<String, String> params, HttpSession session) {
-        Integer userId = getUserIdFromSession(session);
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("message", "Not logged in"));
-        }
-
-        try {
-            double minLat = Double.parseDouble(params.get("minLat"));
-            double maxLat = Double.parseDouble(params.get("maxLat"));
-            double minLon = Double.parseDouble(params.get("minLon"));
-            double maxLon = Double.parseDouble(params.get("maxLon"));
-
-            List<Recorded> records = recordedService.findByUserIdAndLocation(userId, minLat, maxLat, minLon, maxLon);
-            return ResponseEntity.ok(records);
-        } catch (NumberFormatException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("message", "Invalid coordinate format"));
-        }
-    }
+//    @GetMapping("/search")
+//    public ResponseEntity<?> searchByLocation(@RequestParam Map<String, String> params, HttpSession session) {
+//        Integer userId = getUserIdFromSession(session);
+//        if (userId == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("message", "Not logged in"));
+//        }
+//
+//        try {
+//            double minLat = Double.parseDouble(params.get("minLat"));
+//            double maxLat = Double.parseDouble(params.get("maxLat"));
+//            double minLon = Double.parseDouble(params.get("minLon"));
+//            double maxLon = Double.parseDouble(params.get("maxLon"));
+//
+//            List<Recorded> records = recordedService.findByUserIdAndLocation(userId, minLat, maxLat, minLon, maxLon);
+//            return ResponseEntity.ok(records);
+//        } catch (NumberFormatException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("message", "Invalid coordinate format"));
+//        }
+//    }
     
     /**
      * 新しい録音データを登録します。

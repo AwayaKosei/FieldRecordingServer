@@ -52,7 +52,7 @@
     <!-- 新しい録音データを登録する -->
     <insert id="insert" parameterType="com.example.app.domain.Recorded" useGeneratedKeys="true" keyProperty="recordId">
         INSERT INTO records (title, record, user_id, recorded_at, latitude, longitude, rating)
-        VALUES (#{title}, #{record}, #{userId}, #{recordAt}, #{latitude}, #{longitude}, #{rating})
+        VALUES (#{title}, #{record, jdbcType=BLOB}, #{userId}, #{recordAt}, #{latitude}, #{longitude}, #{rating})
     </insert>
     
     <!-- 録音データを更新する -->
@@ -60,7 +60,7 @@
         UPDATE records
         SET
             title = #{title},
-            record = #{record},
+            record = #{record, jdbcType=BLOB},
             recorded_at = #{recordAt},
             latitude = #{latitude},
             longitude = #{longitude},

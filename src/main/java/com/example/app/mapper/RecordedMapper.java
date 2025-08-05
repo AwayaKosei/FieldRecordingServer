@@ -3,6 +3,7 @@ package com.example.app.mapper;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.example.app.domain.Recorded;
 
@@ -29,22 +30,22 @@ public interface RecordedMapper {
      */
     Recorded findByRecordId(Integer recordId);
 
-//    /**
-//     * 特定のユーザーIDと緯度・経度の範囲でデータを取得します。
-//     * @param userId ユーザーID
-//     * @param minLatitude 最小緯度
-//     * @param maxLatitude 最大緯度
-//     * @param minLongitude 最小経度
-//     * @param maxLongitude 最大経度
-//     * @return 録音データリスト
-//     */
-//    List<Recorded> findByUserIdAndLocation(
-//        @Param("userId") Integer userId,
-//        @Param("minLatitude") double minLatitude,
-//        @Param("maxLatitude") double maxLatitude,
-//        @Param("minLongitude") double minLongitude,
-//        @Param("maxLongitude") double maxLongitude
-//    );
+    /**
+     * 特定のユーザーIDと緯度・経度の範囲でデータを取得します。
+     * @param userId ユーザーID
+     * @param minLatitude 最小緯度
+     * @param maxLatitude 最大緯度
+     * @param minLongitude 最小経度
+     * @param maxLongitude 最大経度
+     * @return 録音データリスト
+     */
+    List<Recorded> findByUserIdAndLocation(
+        @Param("userId") Integer userId,
+        @Param("minLatitude") double minLatitude,
+        @Param("maxLatitude") double maxLatitude,
+        @Param("minLongitude") double minLongitude,
+        @Param("maxLongitude") double maxLongitude
+    );
     
     
     

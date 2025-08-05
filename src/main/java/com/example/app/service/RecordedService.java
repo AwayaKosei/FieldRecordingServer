@@ -26,22 +26,22 @@ public interface RecordedService {
      */
     Recorded findById(Integer recordId);
     
-//    /**
-//     * 指定された緯度・経度範囲で録音データを取得します。
-//     * @param userId ユーザーID
-//     * @param minLatitude 最小緯度
-//     * @param maxLatitude 最大緯度
-//     * @param minLongitude 最小経度
-//     * @param maxLongitude 最大経度
-//     * @return 録音データリスト
-//     */
-//    List<Recorded> findByUserIdAndLocation(
-//        Integer userId,
-//        double minLatitude,
-//        double maxLatitude,
-//        double minLongitude,
-//        double maxLongitude
-//    );
+    /**
+     * 指定された緯度・経度範囲で録音データを取得します。
+     * @param userId ユーザーID
+     * @param minLatitude 最小緯度
+     * @param maxLatitude 最大緯度
+     * @param minLongitude 最小経度
+     * @param maxLongitude 最大経度
+     * @return 録音データリスト
+     */
+    List<Recorded> findByUserIdAndLocation(
+        Integer userId,
+        double minLatitude,
+        double maxLatitude,
+        double minLongitude,
+        double maxLongitude
+    );
 
     /**
      * 新しい録音データを登録します。
