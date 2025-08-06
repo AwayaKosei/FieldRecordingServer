@@ -15,60 +15,42 @@
 
     <!-- 全ての録音データを取得する -->
     <select id="findAll" resultType="com.example.app.domain.Recorded">
-        SELECT * FROM records
+        SELECT record_id, title, user_id, recorded_at, latitude, longitude, rating FROM records
     </select>
 
     <!-- 特定のユーザーIDに紐づく録音データを全て取得する -->
     <select id="findByUserId" resultType="com.example.app.domain.Recorded" parameterType="Integer">
-        SELECT * FROM records WHERE user_id = #{userId}
+        SELECT record_id, title, user_id, recorded_at, latitude, longitude, rating FROM records WHERE user_id = #{userId}
     </select>
     
     <!-- 特定の録音IDでデータを取得する -->
-    <select id="findByRecordId" resultType="com.example.app.domain.Recorded" parameterType="Integer">
-        SELECT * FROM records WHERE record_id = #{recordId}
+    <select id="findById" resultType="com.example.app.domain.Recorded" parameterType="Integer">
+        SELECT record_id, title, user_id, recorded_at, latitude, longitude, rating FROM records WHERE record_id = #{recordId}
     </select>
 
     <!--
         [Web API用SQL]
-        特定のユーザーIDと緯度・経度の範囲でデータを取得します。
-        
-        注意：これは単純なSQL文であり、より高速な検索には
-        データベースの空間インデックス（Spatial Index）を
-        使用することを推奨します。
+        特定のユーザーIDと緯度・経度範囲でデータを取得します。
     -->
-<!--    <select id="findByUserIdAndLocation" resultType="com.example.app.domain.Recorded" parameterType="map">-->
-<!--        SELECT *-->
-<!--        FROM records-->
-<!--        WHERE-->
-<!--            user_id = #{userId}-->
-<!--        AND-->
-<!--            latitude BETWEEN #{minLatitude} AND #{maxLatitude}-->
-<!--        AND-->
-<!--            longitude BETWEEN #{minLongitude} AND #{maxLongitude}-->
-<!--    </select>-->
-    
-    
+    <select id="findByUserIdAndLocation" resultType="com.example.app.domain.Recorded" parameterType="map">
+        SELECT record_id, title, user_id, recorded_at, latitude, longitude, rating
+        FROM records
+        WHERE
+            user_id = #{userId}
+        AND
+            latitude BETWEEN #{minLatitude} AND #{maxLatitude}
+        AND
+            longitude BETWEEN #{minLongitude} AND #{maxLongitude}
+    </select>
     
     <!-- 新しい録音データを登録する -->
     <insert id="insert" parameterType="com.example.app.domain.Recorded" useGeneratedKeys="true" keyProperty="recordId">
-        INSERT INTO records (title, record, user_id, recorded_at, latitude, longitude, rating)
-        VALUES (#{title}, #{record, jdbcType=BLOB}, #{userId}, #{recordAt}, #{latitude}, #{longitude}, #{rating})
+        INSERT INTO records (title, user_id, recorded_at, latitude, longitude, rating)
+        VALUES (#{title}, #{userId}, #{recordAt}, #{latitude}, #{longitude}, #{rating})
     </insert>
-    
-    <!-- 録音データを更新する -->
-    <update id="update" parameterType="com.example.app.domain.Recorded">
-        UPDATE records
-        SET
-            title = #{title},
-            record = #{record, jdbcType=BLOB},
-            recorded_at = #{recordAt},
-            latitude = #{latitude},
-            longitude = #{longitude},
-            rating = #{rating}
-        WHERE
-            record_id = #{recordId}
-    </update>
-    
+
+    <!-- 録音データを更新する（この機能は不要とされたため、MyBatisマッパーからは削除済み） -->
+    <!-- <update id="update" ...> は削除されています -->
 
     <!-- 特定の録音IDでデータを削除する -->
     <delete id="deleteById" parameterType="Integer">
@@ -76,4 +58,3 @@
     </delete>
 
 </mapper>
-

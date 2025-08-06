@@ -7,12 +7,14 @@ import jakarta.servlet.http.HttpSession;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.app.domain.Recorded;
@@ -22,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/records")
+@CrossOrigin(origins = "http://localhost:5173", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}, allowCredentials = "true", maxAge = 3600) // この行を追加
 @RequiredArgsConstructor
 public class RecordedController {
 
@@ -110,7 +113,7 @@ public class RecordedController {
      * @param session HTTPセッション
      * @return 登録された録音データ
      */
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<?> createRecord(@RequestBody Recorded recorded, HttpSession session) {
         Integer userId = getUserIdFromSession(session);
         if (userId == null) {
