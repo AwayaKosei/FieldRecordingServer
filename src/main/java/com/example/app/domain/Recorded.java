@@ -28,4 +28,8 @@ public class Recorded {
 	
     //録音位置情報経度 //位置情報についてはgeometry型で保持したかったが、未検証のため
 	private double longitude;
+	
+	//評価
+	private Integer rating;
+	
 }

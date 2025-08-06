@@ -28,7 +28,7 @@ public interface RecordedMapper {
      * @param recordId 録音ID
      * @return 録音データ
      */
-    Recorded findByRecordId(Integer recordId);
+    Recorded findByRecordId(Integer recordId); 
 
     /**
      * 特定のユーザーIDと緯度・経度の範囲でデータを取得します。
@@ -47,9 +47,6 @@ public interface RecordedMapper {
         @Param("maxLongitude") double maxLongitude
     );
     
-    
-    
-    
     /**
      * 新しい録音データを登録します。
      * @param recorded 登録する録音データ
@@ -57,12 +54,12 @@ public interface RecordedMapper {
      */
     int insert(Recorded recorded);
 
-    /**
-     * 録音データを更新します。
-     * @param recorded 更新する録音データ
-     * @return 更新された件数
-     */
-    int update(Recorded recorded);
+    // /**
+    //  * 録音データを更新します。
+    //  * @param recorded 更新する録音データ
+    //  * @return 更新された件数
+    //  */
+    // int update(Recorded recorded); // 不要のため削除
 
     /**
      * 指定された録音IDでデータを削除します。

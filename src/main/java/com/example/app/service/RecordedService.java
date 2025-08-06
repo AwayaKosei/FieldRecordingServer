@@ -35,7 +35,7 @@ public interface RecordedService {
      * @param recordId 録音ID
      * @return 録音データ
      */
-    Recorded findById(Integer recordId);
+    Recorded findByRecordId(Integer recordId);
     
     /**
      * 指定された緯度・経度範囲で録音データを取得します。

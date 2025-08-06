@@ -1,4 +1,4 @@
-package com.example.app.service; // パッケージ名をimplに変更
+package com.example.app.service.impl; // パッケージ名をimplに変更
 
 import java.io.File;
 import java.io.IOException;
@@ -6,7 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.List; // Listをインポート
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.app.domain.Recorded;
 import com.example.app.mapper.RecordedMapper;
+import com.example.app.service.RecordedService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -66,8 +67,8 @@ public class RecordedServiceImpl implements RecordedService { // インターフ
     }
     
     @Override // インターフェースのメソッドを実装
-    public Recorded findById(Integer recordId) {
-        return recordedMapper.findByRecordId(recordId);
+    public Recorded findByRecordId(Integer recordId) {
+        return recordedMapper.findByRecordId(recordId); // ここを修正 (findById -> findByRecordId)
     }
 
     @Override // インターフェースのメソッドを実装
