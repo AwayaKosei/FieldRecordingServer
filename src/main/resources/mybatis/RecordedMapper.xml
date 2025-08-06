@@ -2,37 +2,36 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.app.mapper.RecordedMapper">
 
-    <!--
-        [Auto-Mappingを利用]
-        データベースの列名（record_id, recorded_atなど）と
-        Recordedクラスのプロパティ名（recordId, recordAtなど）が
-        自動でマッピングされるため、resultMapを省略します。
-
-        ※この機能を利用するには、MyBatisの設定ファイルで
-        <setting name="mapUnderscoreToCamelCase" value="true"/>
-        を有効にする必要があります。
-    -->
+    <!-- Recorded オブジェクトのマッピングを明示的に定義 -->
+    <resultMap id="recordedResultMap" type="com.example.app.domain.Recorded">
+        <id property="recordId" column="record_id"/>
+        <result property="title" column="title"/>
+        <!-- <result property="file" column="record" javaType="org.springframework.web.multipart.MultipartFile"/> -->
+        <!-- 上記の行は削除します。file プロパティはデータベースから取得するものではありません。 -->
+        <result property="userId" column="user_id"/>
+        <result property="recordAt" column="recorded_at" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP"/>
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
+        <result property="rating" column="rating"/>
+    </resultMap>
 
     <!-- 全ての録音データを取得する -->
-    <select id="findAll" resultType="com.example.app.domain.Recorded">
+    <select id="findAll" resultMap="recordedResultMap">
         SELECT record_id, title, user_id, recorded_at, latitude, longitude, rating FROM records
     </select>
 
     <!-- 特定のユーザーIDに紐づく録音データを全て取得する -->
-    <select id="findByUserId" resultType="com.example.app.domain.Recorded" parameterType="Integer">
+    <select id="findByUserId" resultMap="recordedResultMap" parameterType="Integer">
         SELECT record_id, title, user_id, recorded_at, latitude, longitude, rating FROM records WHERE user_id = #{userId}
     </select>
     
-    <!-- 特定の録音IDでデータを取得する -->
-    <select id="findById" resultType="com.example.app.domain.Recorded" parameterType="Integer">
+    <!-- 特定の録音IDでデータを取得します。 -->
+    <select id="findByRecordId" resultMap="recordedResultMap" parameterType="Integer">
         SELECT record_id, title, user_id, recorded_at, latitude, longitude, rating FROM records WHERE record_id = #{recordId}
     </select>
 
-    <!--
-        [Web API用SQL]
-        特定のユーザーIDと緯度・経度範囲でデータを取得します。
-    -->
-    <select id="findByUserIdAndLocation" resultType="com.example.app.domain.Recorded" parameterType="map">
+    <!-- 特定のユーザーIDと緯度・経度の範囲でデータを取得します。 -->
+    <select id="findByUserIdAndLocation" resultMap="recordedResultMap" parameterType="map">
         SELECT record_id, title, user_id, recorded_at, latitude, longitude, rating
         FROM records
         WHERE
@@ -43,18 +42,14 @@
             longitude BETWEEN #{minLongitude} AND #{maxLongitude}
     </select>
     
-    <!-- 新しい録音データを登録する -->
+    <!-- 新しい録音データを登録します。 -->
     <insert id="insert" parameterType="com.example.app.domain.Recorded" useGeneratedKeys="true" keyProperty="recordId">
         INSERT INTO records (title, user_id, recorded_at, latitude, longitude, rating)
         VALUES (#{title}, #{userId}, #{recordAt}, #{latitude}, #{longitude}, #{rating})
     </insert>
 
-    <!-- 録音データを更新する（この機能は不要とされたため、MyBatisマッパーからは削除済み） -->
-    <!-- <update id="update" ...> は削除されています -->
-
-    <!-- 特定の録音IDでデータを削除する -->
+    <!-- 指定された録音IDでデータを削除します。 -->
     <delete id="deleteById" parameterType="Integer">
         DELETE FROM records WHERE record_id = #{recordId}
     </delete>
-
 </mapper>

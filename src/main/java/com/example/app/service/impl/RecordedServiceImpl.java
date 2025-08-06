@@ -1,17 +1,18 @@
-package com.example.app.service.impl; // パッケージ名をimplに変更
+package com.example.app.service.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
+import java.io.File; // Fileをインポート
+import java.io.IOException; // IOExceptionをインポート
+import java.nio.file.Files; // Filesをインポート
+import java.nio.file.Path; // Pathをインポート
+import java.nio.file.Paths; // Pathsをインポート
+import java.time.LocalDateTime; // LocalDateTimeをインポート
 import java.util.List;
-import java.util.UUID;
+import java.util.UUID; // UUIDをインポート
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional; // Transactionalをインポート
+import org.springframework.web.multipart.MultipartFile; // MultipartFileをインポート
 
 import com.example.app.domain.Recorded;
 import com.example.app.mapper.RecordedMapper;
@@ -21,14 +22,15 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class RecordedServiceImpl implements RecordedService { // インターフェースを実装
+@Transactional // トランザクション管理を有効にする
+public class RecordedServiceImpl implements RecordedService {
 
     private final RecordedMapper recordedMapper;
 
     @Value("${upload.directory}")
     private String uploadDirectory;
 
-    @Override // インターフェースのメソッドを実装
+    @Override
     public void saveRecord(Recorded recorded) throws IOException {
         MultipartFile file = recorded.getFile();
 
@@ -49,6 +51,7 @@ public class RecordedServiceImpl implements RecordedService { // インターフ
 
         recorded.setTitle(uniqueFilename);
         
+        // recordAt が null の場合に現在日時を設定
         if (recorded.getRecordAt() == null) {
             recorded.setRecordAt(LocalDateTime.now());
         }
@@ -56,22 +59,34 @@ public class RecordedServiceImpl implements RecordedService { // インターフ
         recordedMapper.insert(recorded);
     }
 
-    @Override // インターフェースのメソッドを実装
+    @Override
     public List<Recorded> findAll() {
         return recordedMapper.findAll();
     }
     
-    @Override // インターフェースのメソッドを実装
+    @Override
     public List<Recorded> findByUserId(Integer userId) {
-        return recordedMapper.findByUserId(userId);
+        List<Recorded> records = recordedMapper.findByUserId(userId);
+        // デバッグ用ログ出力
+        if (records != null) {
+            for (Recorded record : records) {
+                System.out.println("DEBUG: recordId=" + record.getRecordId() + ", recordAt=" + record.getRecordAt());
+            }
+        }
+        return records;
     }
     
-    @Override // インターフェースのメソッドを実装
+    @Override
     public Recorded findByRecordId(Integer recordId) {
-        return recordedMapper.findByRecordId(recordId); // ここを修正 (findById -> findByRecordId)
+        Recorded record = recordedMapper.findByRecordId(recordId);
+        // デバッグ用ログ出力
+        if (record != null) {
+            System.out.println("DEBUG: findByRecordId - recordId=" + record.getRecordId() + ", recordAt=" + record.getRecordAt());
+        }
+        return record;
     }
 
-    @Override // インターフェースのメソッドを実装
+    @Override
     public List<Recorded> findByUserIdAndLocation(
         Integer userId,
         double minLatitude,
@@ -82,13 +97,17 @@ public class RecordedServiceImpl implements RecordedService { // インターフ
         return recordedMapper.findByUserIdAndLocation(userId, minLatitude, maxLatitude, minLongitude, maxLongitude);
     }
     
-    @Override // インターフェースのメソッドを実装
+    @Override
     public void register(Recorded recorded) {
-        // このregisterはDBへのメタデータ登録を想定しており、ファイルアップロードはsaveRecordで行う
         recordedMapper.insert(recorded);
     }
 
-    @Override // インターフェースのメソッドを実装
+//    @Override
+//    public void update(Recorded recorded) {
+//        recordedMapper.update(recorded);
+//    }
+    
+    @Override
     public void delete(Integer recordId) {
         recordedMapper.deleteById(recordId);
     }

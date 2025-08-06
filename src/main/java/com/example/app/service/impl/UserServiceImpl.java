@@ -1,4 +1,4 @@
-package com.example.app.service;
+package com.example.app.service.impl;
 
 import java.util.List;
 
@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.app.domain.User;
 import com.example.app.mapper.UserMapper;
+import com.example.app.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
