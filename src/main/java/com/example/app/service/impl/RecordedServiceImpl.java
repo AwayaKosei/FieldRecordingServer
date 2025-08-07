@@ -67,22 +67,14 @@ public class RecordedServiceImpl implements RecordedService {
     @Override
     public List<Recorded> findByUserId(Integer userId) {
         List<Recorded> records = recordedMapper.findByUserId(userId);
-        // デバッグ用ログ出力
-        if (records != null) {
-            for (Recorded record : records) {
-                System.out.println("DEBUG: recordId=" + record.getRecordId() + ", recordAt=" + record.getRecordAt());
-            }
-        }
+
         return records;
     }
     
     @Override
     public Recorded findByRecordId(Integer recordId) {
         Recorded record = recordedMapper.findByRecordId(recordId);
-        // デバッグ用ログ出力
-        if (record != null) {
-            System.out.println("DEBUG: findByRecordId - recordId=" + record.getRecordId() + ", recordAt=" + record.getRecordAt());
-        }
+
         return record;
     }
 

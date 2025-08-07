@@ -50,6 +50,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User findByEmail(String email) {
+        return userMapper.findByEmail(email);
+    }
+    
+    @Override
     public void register(User user) {
         // パスワードをBCryptでハッシュ化してからデータベースに保存する
         String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());

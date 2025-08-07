@@ -28,6 +28,13 @@ public interface UserService {
     User getAuthenticatedUser(String email, String password);
 
     /**
+     * 指定されたメールアドレスでユーザーを取得します。
+     * @param email メールアドレス
+     * @return ユーザー
+     */
+    User findByEmail(String email);
+
+    /**
      * 新しいユーザーを登録します。
      * @param user 登録するユーザー情報
      */
@@ -45,3 +52,4 @@ public interface UserService {
      */
     void delete(Integer userId);
 }
+
