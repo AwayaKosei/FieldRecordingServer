@@ -1,6 +1,6 @@
 package com.example.app.service;
 
-import java.io.IOException; // IOExceptionをインポート
+import java.io.IOException;
 import java.util.List;
 
 import com.example.app.domain.Recorded;
@@ -15,7 +15,7 @@ public interface RecordedService {
      * @param recorded アップロードされたデータと関連情報
      * @throws IOException ファイルの保存中にエラーが発生した場合
      */
-    void saveRecord(Recorded recorded) throws IOException; // ここに throws IOException を追加
+    void saveRecord(Recorded recorded) throws IOException;
 
     /**
      * 全ての録音データを取得します。
@@ -53,12 +53,6 @@ public interface RecordedService {
         double minLongitude,
         double maxLongitude
     );
-
-    /**
-     * 録音データを登録します。（ファイルアップロードとは別のメタデータ登録用）
-     * @param recorded 登録する録音データ
-     */
-    void register(Recorded recorded);
 
     /**
      * 指定された録音IDのデータを削除します。
