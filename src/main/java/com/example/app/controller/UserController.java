@@ -54,20 +54,20 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(HttpSession session) {
         // --- 本番環境に戻す際は、以下のコードをコメントアウトまたは削除し、元のロジックに戻してください ---
-        User dummyUser = new User();
-        dummyUser.setUserId(9999); // テスト用のID
-        dummyUser.setUserName("Test User");
-        dummyUser.setEmail("test@example.com");
-        return ResponseEntity.ok(dummyUser);
+//        User dummyUser = new User();
+//        dummyUser.setUserId(9999); // テスト用のID
+//        dummyUser.setUserName("Test User");
+//        dummyUser.setEmail("test@example.com");
+//        return ResponseEntity.ok(dummyUser);
         // --------------------------------------------------------------------------------------
 
-        // 元のロジック
-        // User user = (User) session.getAttribute("user");
-        // if (user == null) {
-        //     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-        //                          .body(Collections.singletonMap("message", "Not logged in"));
-        // }
-        // return ResponseEntity.ok(user);
+         //元のロジック
+         User user = (User) session.getAttribute("user");
+         if (user == null) {
+             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                  .body(Collections.singletonMap("message", "Not logged in"));
+         }
+         return ResponseEntity.ok(user);
     }
 
     /**
