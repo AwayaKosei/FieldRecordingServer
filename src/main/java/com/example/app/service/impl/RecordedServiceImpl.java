@@ -1,18 +1,18 @@
 package com.example.app.service.impl;
 
-import java.io.File; // Fileをインポート
-import java.io.IOException; // IOExceptionをインポート
-import java.nio.file.Files; // Filesをインポート
-import java.nio.file.Path; // Pathをインポート
-import java.nio.file.Paths; // Pathsをインポート
-import java.time.LocalDateTime; // LocalDateTimeをインポート
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID; // UUIDをインポート
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // Transactionalをインポート
-import org.springframework.web.multipart.MultipartFile; // MultipartFileをインポート
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.app.domain.Recorded;
 import com.example.app.mapper.RecordedMapper;
@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional // トランザクション管理を有効にする
+@Transactional
 public class RecordedServiceImpl implements RecordedService {
 
     private final RecordedMapper recordedMapper;
@@ -33,7 +33,6 @@ public class RecordedServiceImpl implements RecordedService {
     @Override
     public void saveRecord(Recorded recorded) throws IOException {
         MultipartFile file = recorded.getFile();
-
         String originalFilename = file.getOriginalFilename();
         String fileExtension = "";
         if (originalFilename != null && originalFilename.contains(".")) {
@@ -41,17 +40,16 @@ public class RecordedServiceImpl implements RecordedService {
         }
         String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
         Path filePath = Paths.get(uploadDirectory, uniqueFilename);
-
+        
         File uploadDir = new File(uploadDirectory);
         if (!uploadDir.exists()) {
             uploadDir.mkdirs();
         }
 
         Files.copy(file.getInputStream(), filePath);
-
+        
         recorded.setTitle(uniqueFilename);
         
-        // recordAt が null の場合に現在日時を設定
         if (recorded.getRecordAt() == null) {
             recorded.setRecordAt(LocalDateTime.now());
         }
@@ -66,16 +64,12 @@ public class RecordedServiceImpl implements RecordedService {
     
     @Override
     public List<Recorded> findByUserId(Integer userId) {
-        List<Recorded> records = recordedMapper.findByUserId(userId);
-
-        return records;
+        return recordedMapper.findByUserId(userId);
     }
     
     @Override
     public Recorded findByRecordId(Integer recordId) {
-        Recorded record = recordedMapper.findByRecordId(recordId);
-
-        return record;
+        return recordedMapper.findByRecordId(recordId);
     }
 
     @Override
@@ -88,17 +82,7 @@ public class RecordedServiceImpl implements RecordedService {
     ) {
         return recordedMapper.findByUserIdAndLocation(userId, minLatitude, maxLatitude, minLongitude, maxLongitude);
     }
-    
-    @Override
-    public void register(Recorded recorded) {
-        recordedMapper.insert(recorded);
-    }
 
-//    @Override
-//    public void update(Recorded recorded) {
-//        recordedMapper.update(recorded);
-//    }
-    
     @Override
     public void delete(Integer recordId) {
         recordedMapper.deleteById(recordId);

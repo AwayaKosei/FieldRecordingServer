@@ -24,10 +24,10 @@ public class Recorded {
 	private LocalDateTime recordAt;//TODO UTCに変換してサーバーに渡したい
 	
 	//録音位置情報緯度 //位置情報についてはgeometry型で保持したかったが、未検証のため
-	private double latitude;
+	private Double latitude;
 	
     //録音位置情報経度 //位置情報についてはgeometry型で保持したかったが、未検証のため
-	private double longitude;
+	private Double longitude;
 	
 	//評価
 	private Integer rating;

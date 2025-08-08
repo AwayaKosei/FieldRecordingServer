@@ -61,7 +61,7 @@ public class UserController {
 //        return ResponseEntity.ok(dummyUser);
         // --------------------------------------------------------------------------------------
 
-        // 元のロジック
+         //元のロジック
          User user = (User) session.getAttribute("user");
          if (user == null) {
              return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -77,21 +77,13 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user, HttpSession session) {
         try {
-            // メールアドレスが既に登録されているかチェック
-            if (userService.findByEmail(user.getEmail()) != null) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                                     .body(Collections.singletonMap("message", "Email already registered."));
-            }
-
             userService.register(user);
             // 登録成功後、自動的にログイン状態にする
             session.setAttribute("user", user);
             return ResponseEntity.status(HttpStatus.CREATED).body(user);
         } catch (Exception e) {
-            // 例外発生時に、コンソールに詳細なエラーを出力
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                 .body(Collections.singletonMap("message", "Registration failed due to an internal error. Please check server logs."));
+                                 .body(Collections.singletonMap("message", "Registration failed."));
         }
     }
 
