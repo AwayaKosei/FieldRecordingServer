@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.app.domain.Recorded;
+import com.example.app.domain.User;
 import com.example.app.service.RecordedService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,16 +28,33 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/records")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}, allowCredentials = "true", maxAge = 3600)
+@CrossOrigin(origins = "http://localhost:5173"
+// , methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}, allowCredentials = "true", maxAge = 3600
+)
 public class RecordedController {
 
     private final RecordedService recordedService;
 
     // ヘルパーメソッド：セッションからユーザーIDを取得 (テスト用)
     private Integer getUserIdFromSession(HttpSession session) {
-        // 実際の環境ではセッションからユーザーIDを取得
-        return Integer.valueOf(1); // デモ用に常にユーザーID=1を返す
-    }
+      Object id = session.getAttribute("userId");
+      if (id instanceof Integer i) {
+          return i;
+      }
+      if (id instanceof String s) {
+          try {
+              return Integer.valueOf(s);
+          } catch (NumberFormatException e) {
+              // ログを出すか無視
+          }
+      }
+      Object u = session.getAttribute("user");
+      if (u instanceof User user) {
+          return user.getUserId();
+      }
+      return null;
+  }
+
 
     /**
      * 音声ファイルをアップロードするエンドポイント。

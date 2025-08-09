@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpSession;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +20,11 @@ import com.example.app.service.UserService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
+@CrossOrigin(
+	  origins = "http://localhost:5173"
+	  //, allowCredentials = true,
+	  // methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE, RequestMethod.OPTIONS }
+	)
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
@@ -44,6 +50,7 @@ public class UserController {
 
         // セッションにユーザー情報を保存
         session.setAttribute("user", user);
+        session.setAttribute("userId", user.getUserId());
         return ResponseEntity.ok(user);
     }
     
