@@ -3,6 +3,9 @@ package com.example.app.controller;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +16,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,22 +36,21 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/records")
 @RequiredArgsConstructor
-//@CrossOrigin(
-//    origins = "http://localhost:5173",
-//    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
-//    allowCredentials = "true",
-//    maxAge = 3600
-//)
 public class RecordedController {
 
     private final RecordedService recordedService;
 
-    // ★ 本番用：セッションから userId を取得
+    // recordAt は自動バインドさせない（Z付きISO対策）
+    @InitBinder("recorded")
+    public void initBinder(WebDataBinder binder) {
+        binder.setDisallowedFields("recordAt");
+    }
+
     private Integer getUserIdFromSession(HttpSession session) {
         Object id = session.getAttribute("userId");
         if (id instanceof Integer i) return i;
         if (id instanceof String s) {
-            try { return Integer.valueOf(s); } catch (NumberFormatException e) { /* ignore */ }
+            try { return Integer.valueOf(s); } catch (NumberFormatException e) {}
         }
         Object u = session.getAttribute("user");
         if (u instanceof User user) return user.getUserId();
@@ -54,7 +58,10 @@ public class RecordedController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadAudio(@ModelAttribute Recorded recorded, HttpSession session) {
+    public ResponseEntity<String> uploadAudio(
+            @ModelAttribute Recorded recorded,
+            @RequestParam(value = "recordAt", required = false) String recordAtIso,
+            HttpSession session) {
         Integer userId = getUserIdFromSession(session);
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not logged in");
@@ -63,6 +70,14 @@ public class RecordedController {
 
         if (recorded.getFile() == null || recorded.getFile().isEmpty()) {
             return ResponseEntity.badRequest().body("アップロードするファイルがありません。");
+        }
+
+        // Z付きISOが来たときだけ手動パース（UTCとして保存）
+        if (recordAtIso != null && !recordAtIso.isBlank()) {
+            try {
+                Instant ins = Instant.parse(recordAtIso);
+                recorded.setRecordAt(LocalDateTime.ofInstant(ins, ZoneOffset.UTC));
+            } catch (Exception ignore) {}
         }
 
         try {
@@ -129,30 +144,23 @@ public class RecordedController {
         return ResponseEntity.ok(Collections.singletonMap("message", "Record deleted successfully"));
     }
 
-    // ★ 追加：音声バイナリを返すDLエンドポイント
+    // 音声ファイル配信（再生用）
     @GetMapping("/{recordId}/file")
     public ResponseEntity<Resource> getFile(@PathVariable Integer recordId, HttpSession session) throws IOException {
         Integer userId = getUserIdFromSession(session);
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        Recorded rec = recordedService.findByRecordId(recordId);
-        if (rec == null || !rec.getUserId().equals(userId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        if (userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        Path path = recordedService.resolveFilePath(rec); // Service側に実装（下で追加）
-        if (!Files.exists(path)) {
-            return ResponseEntity.notFound().build();
-        }
+        Recorded rec = recordedService.findByRecordId(recordId);
+        if (rec == null || !rec.getUserId().equals(userId)) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+
+        Path path = recordedService.resolveFilePath(rec);
+        if (!Files.exists(path)) return ResponseEntity.notFound().build();
 
         String mime = Files.probeContentType(path);
         Resource resource = new UrlResource(path.toUri());
-
         return ResponseEntity.ok()
-                .header("Content-Type", mime != null ? mime : "audio/webm")
-                .header("Cache-Control", "no-store")
-                // .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + rec.getTitle() + "\"")
-                .body(resource);
+            .header("Content-Type", mime != null ? mime : "audio/webm")
+            .header("Cache-Control", "no-store")
+            .body(resource);
     }
 }

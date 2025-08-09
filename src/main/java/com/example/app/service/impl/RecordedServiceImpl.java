@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -34,35 +35,30 @@ public class RecordedServiceImpl implements RecordedService {
     public void saveRecord(Recorded recorded) throws IOException {
         MultipartFile file = recorded.getFile();
         String originalFilename = file.getOriginalFilename();
-        String fileExtension = "";
+        String ext = "";
         if (originalFilename != null && originalFilename.contains(".")) {
-            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            ext = originalFilename.substring(originalFilename.lastIndexOf("."));
         }
-        String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
-        Path filePath = Paths.get(uploadDirectory, uniqueFilename);
-        
-        File uploadDir = new File(uploadDirectory);
-        if (!uploadDir.exists()) {
-            uploadDir.mkdirs();
-        }
+        String uniqueFilename = UUID.randomUUID().toString() + ext;
 
-        Files.copy(file.getInputStream(), filePath);
-        
+        File dir = new File(uploadDirectory);
+        if (!dir.exists()) dir.mkdirs();
+
+        Path filePath = Paths.get(uploadDirectory, uniqueFilename).normalize();
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
         recorded.setTitle(uniqueFilename);
-        
         if (recorded.getRecordAt() == null) {
             recorded.setRecordAt(LocalDateTime.now());
         }
 
         recordedMapper.insert(recorded);
-        
-        }
-    /** 追加: レコードのファイル保存パスを復元 */
-    public java.nio.file.Path resolveFilePath(com.example.app.domain.Recorded rec) {
-    	// title に ../ 等が混ざっても normalize で外へ出ないように
-    	return java.nio.file.Paths.get(uploadDirectory).resolve(rec.getTitle()).normalize();
-        
     }
+    @Override
+    public Path resolveFilePath(Recorded rec) {
+        return Paths.get(uploadDirectory).resolve(rec.getTitle()).normalize();
+    }
+
 
     @Override
     public List<Recorded> findAll() {

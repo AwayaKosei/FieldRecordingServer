@@ -19,11 +19,6 @@ import com.example.app.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
-//@CrossOrigin(
-//    origins = "http://localhost:5173",
-//    allowCredentials = "true", // Spring Boot 3.x では "true" でも true でもOK
-//    methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE, RequestMethod.OPTIONS }
-//)
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -41,12 +36,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                                  .body(Collections.singletonMap("message", "Invalid email or password"));
         }
-
-        // セッションへ保存（後続APIで参照）
         session.setAttribute("user", user);
         session.setAttribute("userId", user.getUserId());
-
-        // DTO で返す（password を出さない）
         return ResponseEntity.ok(UserDto.from(user));
     }
 
@@ -63,7 +54,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user, HttpSession session) {
         try {
-            userService.register(user); // ここで userId がセットされる想定（MyBatisのselectKey等）
+            userService.register(user); // ※ ここで BCrypt でハッシュ化＆ userId 採番される想定
             session.setAttribute("user", user);
             session.setAttribute("userId", user.getUserId());
             return ResponseEntity.status(HttpStatus.CREATED).body(UserDto.from(user));
