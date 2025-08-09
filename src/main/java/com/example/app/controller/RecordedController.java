@@ -1,15 +1,18 @@
 package com.example.app.controller;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpSession;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -28,49 +31,36 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/records")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173"
-// , methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}, allowCredentials = "true", maxAge = 3600
-)
+//@CrossOrigin(
+//    origins = "http://localhost:5173",
+//    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
+//    allowCredentials = "true",
+//    maxAge = 3600
+//)
 public class RecordedController {
 
     private final RecordedService recordedService;
 
-    // ヘルパーメソッド：セッションからユーザーIDを取得 (テスト用)
+    // ★ 本番用：セッションから userId を取得
     private Integer getUserIdFromSession(HttpSession session) {
-      Object id = session.getAttribute("userId");
-      if (id instanceof Integer i) {
-          return i;
-      }
-      if (id instanceof String s) {
-          try {
-              return Integer.valueOf(s);
-          } catch (NumberFormatException e) {
-              // ログを出すか無視
-          }
-      }
-      Object u = session.getAttribute("user");
-      if (u instanceof User user) {
-          return user.getUserId();
-      }
-      return null;
-  }
+        Object id = session.getAttribute("userId");
+        if (id instanceof Integer i) return i;
+        if (id instanceof String s) {
+            try { return Integer.valueOf(s); } catch (NumberFormatException e) { /* ignore */ }
+        }
+        Object u = session.getAttribute("user");
+        if (u instanceof User user) return user.getUserId();
+        return null;
+    }
 
-
-    /**
-     * 音声ファイルをアップロードするエンドポイント。
-     * @param recorded アップロードするファイル情報を含むRecordedオブジェクト
-     * @param session HTTPセッション
-     * @return 成功メッセージ
-     */
     @PostMapping("/upload")
     public ResponseEntity<String> uploadAudio(@ModelAttribute Recorded recorded, HttpSession session) {
         Integer userId = getUserIdFromSession(session);
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not logged in");
         }
-
         recorded.setUserId(userId);
-        
+
         if (recorded.getFile() == null || recorded.getFile().isEmpty()) {
             return ResponseEntity.badRequest().body("アップロードするファイルがありません。");
         }
@@ -84,11 +74,6 @@ public class RecordedController {
         }
     }
 
-    /**
-     * 全ての録音データを取得します。
-     * @param session HTTPセッション
-     * @return 録音データリスト
-     */
     @GetMapping
     public ResponseEntity<?> getAllRecords(HttpSession session) {
         Integer userId = getUserIdFromSession(session);
@@ -98,8 +83,7 @@ public class RecordedController {
         List<Recorded> records = recordedService.findByUserId(userId);
         return ResponseEntity.ok(records);
     }
-    
-    // --- 既存のAPIエンドポイント ---
+
     @GetMapping("/{recordId}")
     public ResponseEntity<?> getRecordById(@PathVariable Integer recordId, HttpSession session) {
         Integer userId = getUserIdFromSession(session);
@@ -112,10 +96,6 @@ public class RecordedController {
         }
         return ResponseEntity.ok(record);
     }
-    
-    
-    
-    
 
     @GetMapping("/search")
     public ResponseEntity<?> searchByLocation(@RequestParam Map<String, String> params, HttpSession session) {
@@ -134,40 +114,6 @@ public class RecordedController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("message", "Invalid coordinate format"));
         }
     }
-    
-    @GetMapping("/{recordId}/file")
-    public ResponseEntity<org.springframework.core.io.Resource> getFile(
-            @PathVariable Integer recordId,
-            jakarta.servlet.http.HttpSession session) throws java.io.IOException {
-
-        Integer userId = getUserIdFromSession(session);
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        Recorded rec = recordedService.findByRecordId(recordId);
-        if (rec == null || !rec.getUserId().equals(userId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        java.nio.file.Path path = recordedService.resolveFilePath(rec);
-        if (!java.nio.file.Files.exists(path)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        String mime = java.nio.file.Files.probeContentType(path);
-        org.springframework.core.io.UrlResource resource = new org.springframework.core.io.UrlResource(path.toUri());
-
-        return ResponseEntity.ok()
-                .header("Content-Type", mime != null ? mime : "audio/webm")
-                .header("Cache-Control", "no-store")
-                // ブラウザ内再生を想定：inline。ダウンロードさせたいなら attachment に変更
-                // .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + rec.getTitle() + "\"")
-                .body(resource);
-    }
-
-    
-    
 
     @DeleteMapping("/{recordId}")
     public ResponseEntity<?> deleteRecord(@PathVariable Integer recordId, HttpSession session) {
@@ -181,5 +127,32 @@ public class RecordedController {
         }
         recordedService.delete(recordId);
         return ResponseEntity.ok(Collections.singletonMap("message", "Record deleted successfully"));
+    }
+
+    // ★ 追加：音声バイナリを返すDLエンドポイント
+    @GetMapping("/{recordId}/file")
+    public ResponseEntity<Resource> getFile(@PathVariable Integer recordId, HttpSession session) throws IOException {
+        Integer userId = getUserIdFromSession(session);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Recorded rec = recordedService.findByRecordId(recordId);
+        if (rec == null || !rec.getUserId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        Path path = recordedService.resolveFilePath(rec); // Service側に実装（下で追加）
+        if (!Files.exists(path)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String mime = Files.probeContentType(path);
+        Resource resource = new UrlResource(path.toUri());
+
+        return ResponseEntity.ok()
+                .header("Content-Type", mime != null ? mime : "audio/webm")
+                .header("Cache-Control", "no-store")
+                // .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + rec.getTitle() + "\"")
+                .body(resource);
     }
 }
