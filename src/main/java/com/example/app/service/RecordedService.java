@@ -1,6 +1,7 @@
 package com.example.app.service;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 import com.example.app.domain.Recorded;
@@ -59,4 +60,6 @@ public interface RecordedService {
      * @param recordId 削除する録音ID
      */
     void delete(Integer recordId);
+
+		Path resolveFilePath(Recorded rec);
 }

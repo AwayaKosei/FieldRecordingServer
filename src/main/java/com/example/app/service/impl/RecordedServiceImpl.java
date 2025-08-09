@@ -55,6 +55,13 @@ public class RecordedServiceImpl implements RecordedService {
         }
 
         recordedMapper.insert(recorded);
+        
+        }
+    /** 追加: レコードのファイル保存パスを復元 */
+    public java.nio.file.Path resolveFilePath(com.example.app.domain.Recorded rec) {
+    	// title に ../ 等が混ざっても normalize で外へ出ないように
+    	return java.nio.file.Paths.get(uploadDirectory).resolve(rec.getTitle()).normalize();
+        
     }
 
     @Override
@@ -87,4 +94,22 @@ public class RecordedServiceImpl implements RecordedService {
     public void delete(Integer recordId) {
         recordedMapper.deleteById(recordId);
     }
+//    
+//    @Value("${upload.directory}")
+//    private String uploadDir;  // ex) /var/app/uploads
+//
+//    // 既存の saveRecord(...) では、ファイルを title で保存している前提
+//    // title はユニーク名（拡張子含む）
+//
+//    public Path resolveFilePath(Recorded rec) {
+//        // 必要なら title のサニタイズを挟む（../を弾く等）
+//        return Paths.get(uploadDir).resolve(rec.getTitle()).normalize();
+//    }
+//
+//    // 参考：初期化でディレクトリ作成
+//    @PostConstruct
+//    public void ensureDir() throws IOException {
+//        Files.createDirectories(Paths.get(uploadDir));
+//    }
+    
 }

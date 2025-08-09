@@ -95,6 +95,10 @@ public class RecordedController {
         }
         return ResponseEntity.ok(record);
     }
+    
+    
+    
+    
 
     @GetMapping("/search")
     public ResponseEntity<?> searchByLocation(@RequestParam Map<String, String> params, HttpSession session) {
@@ -113,6 +117,40 @@ public class RecordedController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("message", "Invalid coordinate format"));
         }
     }
+    
+    @GetMapping("/{recordId}/file")
+    public ResponseEntity<org.springframework.core.io.Resource> getFile(
+            @PathVariable Integer recordId,
+            jakarta.servlet.http.HttpSession session) throws java.io.IOException {
+
+        Integer userId = getUserIdFromSession(session);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Recorded rec = recordedService.findByRecordId(recordId);
+        if (rec == null || !rec.getUserId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        java.nio.file.Path path = recordedService.resolveFilePath(rec);
+        if (!java.nio.file.Files.exists(path)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String mime = java.nio.file.Files.probeContentType(path);
+        org.springframework.core.io.UrlResource resource = new org.springframework.core.io.UrlResource(path.toUri());
+
+        return ResponseEntity.ok()
+                .header("Content-Type", mime != null ? mime : "audio/webm")
+                .header("Cache-Control", "no-store")
+                // ブラウザ内再生を想定：inline。ダウンロードさせたいなら attachment に変更
+                // .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + rec.getTitle() + "\"")
+                .body(resource);
+    }
+
+    
+    
 
     @DeleteMapping("/{recordId}")
     public ResponseEntity<?> deleteRecord(@PathVariable Integer recordId, HttpSession session) {
