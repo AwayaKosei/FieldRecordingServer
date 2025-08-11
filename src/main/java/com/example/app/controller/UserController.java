@@ -1,3 +1,4 @@
+// src/main/java/com/example/app/controller/UserController.java
 package com.example.app.controller;
 
 import java.util.Collections;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.app.domain.User;
-import com.example.app.dto.UserDto;
 import com.example.app.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -34,11 +34,12 @@ public class UserController {
         User user = userService.getAuthenticatedUser(email, password);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                 .body(Collections.singletonMap("message", "Invalid email or password"));
+                    .body(Collections.singletonMap("message", "Invalid email or password"));
         }
         session.setAttribute("user", user);
         session.setAttribute("userId", user.getUserId());
-        return ResponseEntity.ok(UserDto.from(user));
+        // password は @JsonProperty(WRITE_ONLY) で非表示
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping("/me")
@@ -46,21 +47,21 @@ public class UserController {
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                 .body(Collections.singletonMap("message", "Not logged in"));
+                    .body(Collections.singletonMap("message", "Not logged in"));
         }
-        return ResponseEntity.ok(UserDto.from(user));
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user, HttpSession session) {
         try {
-            userService.register(user); // ※ ここで BCrypt でハッシュ化＆ userId 採番される想定
+            userService.register(user); // BCrypt でハッシュ化 & userId 採番の想定
             session.setAttribute("user", user);
             session.setAttribute("userId", user.getUserId());
-            return ResponseEntity.status(HttpStatus.CREATED).body(UserDto.from(user));
+            return ResponseEntity.status(HttpStatus.CREATED).body(user);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                 .body(Collections.singletonMap("message", "Registration failed."));
+                    .body(Collections.singletonMap("message", "Registration failed."));
         }
     }
 
